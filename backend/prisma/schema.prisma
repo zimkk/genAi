@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  firstName String?
+  lastName  String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  images    Image[]
+  apiUsage  ApiUsage[]
+
+  @@map("users")
+}
+
+model Image {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String?
+  prompt      String
+  negativePrompt String?
+  imageUrl    String
+  thumbnailUrl String?
+  width       Int?
+  height      Int?
+  model       String?
+  style       String?
+  quality     String?
+  steps       Int?
+  seed        String?
+  vyroImageId String?  // Vyro AI's image ID
+  metadata    Json?    // Additional metadata from Vyro AI
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("images")
+}
+
+model ApiUsage {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   // Which API endpoint was used
+  cost      Float?   // Cost in credits/tokens
+  successful Boolean @default(true)
+  errorMessage String?
+  requestData Json?  // Store request parameters
+  responseData Json? // Store response data
+  createdAt DateTime @default(now())
+
+  // Relationships
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_usage")
+}
